@@ -6,7 +6,7 @@ nppstub - Notepad++ Stub
 What is nppstub?
 -----
 
-It is a bash script that allows the integration of Notepad++/Wine with bash commands output files list.
+It's a bash script that allows the integration of Notepad++/Wine with bash commands output files list.
 
 Install dependencies!
 -----

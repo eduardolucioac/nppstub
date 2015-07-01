@@ -101,9 +101,9 @@ source ~/.bashrc # Logged in as your user!
  - Give permissions to your user...
 
 ```
-chown -R eduardo /home/eduardo/scripts/*
-chown -R :eduardo /home/eduardo/scripts/*
-chmod -R 700 /home/eduardo/scripts/*
+chown -R <your user> ~/scripts/*
+chown -R :<your user> ~/scripts/*
+chmod -R 700 ~/scripts/*
 ```
 
 How to use!
@@ -127,4 +127,4 @@ nppstub $(bash command)
 nppstub $(find ./ -name "*.py" -type f -exec grep -l 'some string' -- {} \;)
 ```
 
- - Note: In the above example we do a search (find command) for all files with extension "*.py" that have the content "some string" in your text!
+ - Note: In the above example we do a search ("find" command) for all files with extension "*.py" that have the content "some string" in your text!

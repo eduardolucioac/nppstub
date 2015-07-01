@@ -123,8 +123,17 @@ nppstub $(bash command)
 
  - Example...
  
-``` 
+```
 nppstub $(find ./ -name "*.py" -type f -exec grep -l 'some string' -- {} \;)
 ```
 
  - Note: In the above example we do a search ("find" command) for all files with extension "*.py" that have the content "some string" in your text!
+
+TIP!
+-----
+
+ - The following configuration is used to mount a samba share and avoids compatibility issues with Wine applications...
+
+```
+mount -t cifs -o noperm,username=<user name>,password=<password>,uid=1000,cache=none,auto,nounix <smb share> <folder to mount in>
+```

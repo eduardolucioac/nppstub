@@ -19,7 +19,7 @@ Install dependencies!
 apt-get install wine1.7 winetricks
 ```
 
- - Note I: To ensure compatibility with 32-bit applications in Wine...
+ - Note I: To ensure compatibility with 32-bit applications on Wine...
  
 ```
 apt-get install ia32-libs

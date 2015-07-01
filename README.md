@@ -31,7 +31,7 @@ apt-get install ia32-libs
 apt-get install ttf-mscorefonts-installer
 ```
 
-Install as an integrated terminal command and enable to root.
+Install as an integrated terminal command and enable it to root
 -----
 
  - Install Notepad++ as your user and then as root (su)...

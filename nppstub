@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # --------------------------------------------------------------------
-# Passa para o Notepad++ a saída de um comando conforme o modelo...
+# Passes into Notepad++/Wine the output of a command as the model...
 #
 # "
-# bash notepad++.sh $(command_output)
+# <file path>/nppstub $(bash command)
 # "
 #
-# Exemplo:
+# Eg.:
 #
 # "
-# bash /home/eduardo/Data/Temp/20150629.1/notepad++.sh $(find ./DESK_TO_CLEAN -name "*.txt" -type f)
+# <file path>/nppstub $(find ./ -name "*.py" -type f -exec grep -l 'some string' -- {} \;)
 # "
 # --------------------------------------------------------------------
 
@@ -22,57 +22,57 @@ SPACE_CTRL0=""
 INPUT_FILES=""
 ARRAY_TEST=()
 
-# Note: Itera na entrada padrão para o script! By Questor
+# Note: Iterate on bash default input! by questor
 for INPUT_FILE in "$@"
 do
 
-    # Note: Infelizmemte a entrada só pode ser tradada (split) por espaços de maneira
-    # que 'INPUT_FILE' irá receber valores inválidos se os caminhos de pasta informados
-    # possuirem espaços! By Questor
+    # Note: Unfortunately the entry can only be treated (split) by spaces so that
+    # 'INPUT_FILE' will receive invalid values if the folder paths informed have
+    # spaces! By Questor
     INPUT_FILE_ACCUMULATOR=$INPUT_FILE_ACCUMULATOR$SPACE_CTRL0$INPUT_FILE
     SPACE_CTRL0=" "
 
-    # Note: Vamos construindo os caminhos parte à parte (concatenando as strings)
-    # até obtermos um caminho válido conforme a checagem que fazemos logo abaixo!
-    # By Questor
+    # Note: We build up the files path part-to-part (concatenating strings) to obtain
+    # a valid path as the checking we do below! By Questor
     if [ -f "$INPUT_FILE_ACCUMULATOR" ]; then
 
-        # Note: Checa se é ou não um caminho absoluto! By Questor
+        # Note: Checks whether is or isn't an absolute path! By Questor
         if ! [[ "$INPUT_FILE_ACCUMULATOR" = /* ]] ; then
 
-            # Note: Transforma um caminho relativo em absoluto. Esse é uma
-            # necessidade do Wine! By Questor
+            # Note: Transforms a relative in absolute path. This is a Wine need!
+            # By Questor
             FILE_NOW=$(realpath "$INPUT_FILE_ACCUMULATOR")
         else
 
-            # Note: Para o caso de caminho absoluto! By Questor
+            # Note: In case of absolute path! By Questor
             FILE_NOW="$INPUT_FILE_ACCUMULATOR"
         fi
 
-        # Note: Adiciona a letra padrão para o root! By Questor
+        # Note: Adds the default drive letter! By Questor
         FILE_NOW=$(winepath -w "$FILE_NOW")
 
-        # Note: Escapa as barras e espaços! Está conforme o padrão do Wine! By Questor
+        # Note: Escapes the bars and spaces! Conforms to the Wine standards!
+        # By Questor
         FILE_NOW=$(echo $FILE_NOW | sed 's,\\,\\\\,g' | sed 's, ,\\ ,g')
 
-        # Note: Forma o comando com os arquivos para passar como argumento para o
-        # Notepad++! By Questor
+        # Note: Make the command with the files to pass as an argument for Notepad++!
+        # By Questor
         INPUT_FILES=$INPUT_FILES$SPACE_CTRL1$FILE_NOW
 
         SPACE_CTRL1=" "
         SPACE_CTRL0=""
         INPUT_FILE_ACCUMULATOR=""
 
-    # Note: Usamos o '2>/dev/null' para suprimir prints indesejados! By Questor
+    # Note: We use '2>/dev/null' to suppress unwanted prints! By Questor
     fi 2>/dev/null
 done
 
-# Note: Executa o Wine conforme o local onde se encontra o mesmo! By Questor
+# Note: Runs Wine as the place where it's! By Questor
 if [[ -e "$HOME/.wine/drive_c/Program Files/Notepad++/notepad++.exe" ]]; then
     eval "env WINEPREFIX=\"$HOME/.wine\" wine \"C:/Program Files/Notepad++/Notepad++.exe\" -multiInst $INPUT_FILES" 2>/dev/null
 elif [[ -e "$HOME/.wine/drive_c/Program Files (x86)/Notepad++/notepad++.exe" ]]; then
 
-    # Note: O eval é uma estratégia para conseguir passar os argumentos para o Wine/Notepad++! By Questor
+    # Note: The eval is a strategy to get pass the arguments to the Wine/Notepad++! By Questor
     eval "env WINEPREFIX=\"$HOME/.wine\" wine \"C:/Program Files (x86)/Notepad++/Notepad++.exe\" -multiInst $INPUT_FILES" 2>/dev/null
 else
     echo "Notepad++.exe can't be found!"

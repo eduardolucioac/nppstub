@@ -27,9 +27,9 @@ apt-get install ia32-libs
  
  - Note II: To solve problems with fonts in Wine...
 
-"
+```
 apt-get install ttf-mscorefonts-installer
-"
+```
 
 Install as an integrated terminal command and enable to root.
 -----

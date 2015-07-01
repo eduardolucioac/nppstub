@@ -89,7 +89,7 @@ export PATH=$PATH:~/scripts
 vi ~/.bashrc
 ```
 
-Run ...
+ - Run ...
 
 ```
 source /root/.bashrc # Logged in as root (su)!

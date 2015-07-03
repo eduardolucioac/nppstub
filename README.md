@@ -137,3 +137,12 @@ TIP!
 ```
 mount -t cifs -o noperm,username=<user name>,password=<password>,uid=1000,cache=none,auto,nounix <smb share> <folder to mount in>
 ```
+
+Contact
+-----
+
+groovimdoc@gmail.com
+
+Brazil-DF
+
+<img border="0" alt="GrooVim Doc" src="http://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Map_of_Brazil_with_flag.svg/180px-Map_of_Brazil_with_flag.svg.png" height="15%" width="15%"/>

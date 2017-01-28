@@ -68,12 +68,14 @@ do
 done
 
 # Note: Runs Wine as the place where it's! By Questor
-if [[ -e "$HOME/.wine/drive_c/Program Files/Notepad++/notepad++.exe" ]]; then
-    eval "env WINEPREFIX=\"$HOME/.wine\" wine \"C:/Program Files/Notepad++/Notepad++.exe\" -multiInst -nosession $INPUT_FILES" 2>/dev/null & disown
+if [[ -e "$HOME/.PlayOnLinux/wineprefix/npp/drive_c/Program Files/Notepad++/notepad++.exe" ]]; then
+    eval "/usr/share/playonlinux/playonlinux --run \"notepad++\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
 elif [[ -e "$HOME/.wine/drive_c/Program Files (x86)/Notepad++/notepad++.exe" ]]; then
 
-    # Note: The eval is a strategy to get pass the arguments to the Wine/Notepad++! Use disown is a strategy to detach the process! By Questor
-    eval "env WINEPREFIX=\"$HOME/.wine\" wine \"C:/Program Files (x86)/Notepad++/Notepad++.exe\" -multiInst -nosession $INPUT_FILES" 2>/dev/null & disown
+    # Note: The eval is a strategy to get pass the arguments to the Wine/Notepad++! 
+    # Use "2> /dev/null 1> /dev/null" is a strategy to detach the process! By Questor
+    eval "env WINEPREFIX=\"$HOME/.wine\" wine \"C:/Program Files (x86)/Notepad++/Notepad++.exe\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
+    echo "Notepad++.exe can't be found!"
 else
     echo "Notepad++.exe can't be found!"
 fi

@@ -1,8 +1,6 @@
 nppstub - Notepad++ Stub
 =============
 
-<img border="0" alt="GrooVim Doc" src="http://imageshack.com/a/img829/4064/meg6.png" height="15%" width="15%"/>GrooVim Doc
-
 What is nppstub?
 -----
 
@@ -43,41 +41,39 @@ wine <filepath>/npp.6.7.9.2.Installer.exe
  - Create the folder below...
 
 ```
-mkdir ~/scripts
+mkdir /home/[your_user]/.scripts
 ```
 
 NOTE: For Arch (or based)...
 
 ```
 vim /etc/bash.bashrc
-vim ~/.bashrc
-export PATH=$PATH:/home/eduardo/.scripts
-export PATH=$PATH:/root/.scripts
+vim /home/[your_user]/.bashrc
 ```
 
  - Copy nppstub to scripts folder...
 
 ```
-cp -avr <filepath>/nppstub ~/scripts/
+cp -avr [file_path]/nppstub /home/[your_user]/.scripts/
 ```
 
  - Create a symbolic link to the root user (su)...
 
 ```
-ln -s ~/scripts/ /root/scripts
+ln -s /home/[your_user]/.scripts/ /root/.scripts
 ```
 
  - Run...
 
 ```
-export PATH=$PATH:/root/scripts # Logged in as root (su)!
-export PATH=$PATH:~/scripts # Logged in as your user!
+export PATH=$PATH:/root/.scripts # Logged in as root (su)!
+export PATH=$PATH:/home/[your_user]/.scripts # Logged in as your user!
 ```
 
  - Add the line...
 
 ```
-export PATH=$PATH:/root/scripts
+export PATH=$PATH:/root/.scripts
 ```
 
 ... at the end of the file...
@@ -89,20 +85,20 @@ vi /root/.bashrc
  - Add the line...
 
 ```
-export PATH=$PATH:~/scripts
+export PATH=$PATH:/home/[your_user]/.scripts
 ```
 
 ... at the end of the file ...
 
 ```
-vi ~/.bashrc
+vi /home/[your_user]/.bashrc
 ```
 
  - Run ...
 
 ```
 source /root/.bashrc # Logged in as root (su)!
-source ~/.bashrc # Logged in as your user!
+source /home/[your_user]/.bashrc # Logged in as your user!
 ```
 
 ... to reload the ".bashrc"!
@@ -110,9 +106,9 @@ source ~/.bashrc # Logged in as your user!
  - Give permissions to your user...
 
 ```
-chown -R <your user> ~/scripts/*
-chown -R :<your user> ~/scripts/*
-chmod -R 700 ~/scripts/*
+chown -R <your user> /home/[your_user]/.scripts/*
+chown -R :<your user> /home/[your_user]/.scripts/*
+chmod -R 700 /home/[your_user]/.scripts/*
 ```
 
 How to use!
@@ -140,7 +136,7 @@ nppstub $(find ./ -name "*.py" -type f -exec grep -l 'some string' -- {} \;)
 
  - Note: In the above example we do a search ("find" command) for all files with extension "*.py" that have the content "some string" in your text!
 
-TIP!
+PLUS!
 -----
 
  - The following configuration is used to mount a samba share and avoids compatibility issues with Wine applications...

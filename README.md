@@ -9,49 +9,25 @@ It's a bash script that allows the integration of Notepad++/Wine with bash comma
 Install dependencies!
 -----
 
- * The nppstub depends on Wine ("wine" and "winepath" commands) and the "realpath" command.
-
- - Install Wine...
-
-```
-apt-get install wine1.7 winetricks
-```
-
- - Note I: To ensure compatibility with 32-bit applications on Wine...
- 
-```
-apt-get install ia32-libs
-```
- 
- - Note II: To solve problems with fonts in Wine...
-
-```
-apt-get install ttf-mscorefonts-installer
-```
+The nppstub - of course - depends on Wine ("wine", "winepath" and "realpath" commands basically).
 
 Install as an integrated terminal command and enable it to root
 -----
 
- - Install Notepad++ as your user and then as root (su)...
-
-```
-wine <filepath>/npp.6.7.9.2.Installer.exe
-```
-
- - Create the folder below...
+ - Install Notepad++ as your user and then as root (su) and create the folder below...
 
 ```
 mkdir /home/[your_user]/.scripts
 ```
 
---------------
-NOTE: For file ".bashrc" on Arch (or based) use...
+-----
+NOTE: For the file ".bashrc" on Arch (or based) use...
 
 ```
 vim /etc/bash.bashrc # For root configs!
 vim /home/[your_user]/.bashrc # For your user configs!
 ```
---------------
+-----
 
  - Copy nppstub to scripts folder...
 
@@ -144,10 +120,10 @@ nppstub $(bash command)
 <file path>/nppstub $(bash command)
 ```
 
- - Example...
+ - One example...
  
 ```
-nppstub $(find ./ -name "*.py" -type f -exec grep -l 'some string' -- {} \;)
+nppstub $(find ./ -name "*.py" -type f -exec grep -iFl 'some string' -- {} \;)
 ```
 
  - Note: In the above example we do a search ("find" command) for all files with extension "*.py" that have the content "some string" in your text!

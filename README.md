@@ -44,12 +44,14 @@ wine <filepath>/npp.6.7.9.2.Installer.exe
 mkdir /home/[your_user]/.scripts
 ```
 
-NOTE: For Arch (or based)...
+--------------
+NOTE: For file ".bashrc" on Arch (or based) use...
 
 ```
 vim /etc/bash.bashrc
 vim /home/[your_user]/.bashrc
 ```
+--------------
 
  - Copy nppstub to scripts folder...
 

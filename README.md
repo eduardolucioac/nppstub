@@ -113,6 +113,20 @@ chown -R :<your user> /home/[your_user]/.scripts/*
 chmod -R 700 /home/[your_user]/.scripts/*
 ```
 
+ - At the end of the nppstub file where the lines...
+ 
+```
+eval "/usr/share/playonlinux/playonlinux --run \"notepad++\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
+```
+
+... and...
+
+```
+eval "env WINEPREFIX=\"$HOME/.wine\" wine \"C:/Program Files (x86)/Notepad++/Notepad++.exe\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
+```
+
+... make the adjustments according to the installation of Notepad++ in your Wine.
+
 How to use!
 -----
 

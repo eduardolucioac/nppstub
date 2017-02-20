@@ -48,8 +48,8 @@ mkdir /home/[your_user]/.scripts
 NOTE: For file ".bashrc" on Arch (or based) use...
 
 ```
-vim /etc/bash.bashrc
-vim /home/[your_user]/.bashrc
+vim /etc/bash.bashrc # For root configs!
+vim /home/[your_user]/.bashrc # For your user configs!
 ```
 --------------
 

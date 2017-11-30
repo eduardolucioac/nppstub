@@ -14,67 +14,122 @@
 # "
 # --------------------------------------------------------------------
 
+F_SPLIT_R=()
+f_split() {
+    : 'It does a "split" into a given string and returns an array.
+
+    Args:
+        TARGET_P (str): Target string to "split".
+        DELIMITER_P (Optional[str]): Delimiter used to "split". If not 
+    informed the split will be done by spaces.
+
+    Returns:
+        F_SPLIT_R (array): Array with the provided string separated by the 
+    informed delimiter.
+    '
+
+    F_SPLIT_R=()
+    TARGET_P=$1
+    DELIMITER_P=$2
+    if [ -z "$DELIMITER_P" ] ; then
+        DELIMITER_P=" "
+    fi
+
+    REMOVE_N=1
+    if [ "$DELIMITER_P" == "\n" ] ; then
+        REMOVE_N=0
+    fi
+
+    if [ ${REMOVE_N} -eq 1 ] ; then
+
+        # NOTE: Due to bash limitations we have some problems getting the 
+        # output of a split by awk inside an array and so we need to use 
+        # "line break" (\n) to succeed. Seen this, we remove the line breaks 
+        # momentarily afterwards we reintegrate them. The problem is that if 
+        # there is a line break in the "string" informed, this line break will 
+        # be lost, that is, it is erroneously deleted in the output! 
+        # By Questor
+        TARGET_P=$(echo "$TARGET_P" | awk 'BEGIN {RS="dn" } {gsub("\n","3f2c417d448c46918289218b7337fcaf") ;printf $0 }')
+    fi
+
+    SPLIT_NOW=$(awk -F"$DELIMITER_P" '{for(i=1;i<=NF;i++){printf "%s\n", $i}}' <<<"${TARGET_P}")
+
+    while IFS= read -r LINE_NOW; do
+        if [ ${REMOVE_N} -eq 1 ] ; then
+            LN_NOW_WITH_N=$(awk 'BEGIN {RS="dn"} {gsub("3f2c417d448c46918289218b7337fcaf","\n") ;printf $0 }' <<<"${LINE_NOW}")
+            F_SPLIT_R+=("$LN_NOW_WITH_N")
+        else
+            F_SPLIT_R+=("$LINE_NOW")
+        fi
+    done <<< "$SPLIT_NOW"
+}
+
 INPUT_FILES=""
 SPACE_CTRL=""
 INPUT_FILE_ACCUMULATOR=""
-SPACE_CTRL1=""
-SPACE_CTRL0=""
-INPUT_FILES=""
-ARRAY_TEST=()
+f_split "$(echo -ne $@)" "/"
+TOTAL=${#F_SPLIT_R[*]}
+INPUT_FILE_ACCUMULATOR=""
+for (( i=0; i<=$(( $TOTAL -1 )); i++ )) ; do
 
-# Note: Iterate on bash default input! by questor
-for INPUT_FILE in "$@"
-do
+    # NOTE: Unfortunately the input can only be treated as string so that 
+    # 'INPUT_FILE' will receive invalid values if the folder paths informed 
+    # have spaces! By Questor
+    INPUT_FILE="${F_SPLIT_R[$i]}"
+    if [ -n "$INPUT_FILE" ] ; then
+        INPUT_FILE_ACCUMULATOR=$INPUT_FILE_ACCUMULATOR"/"$INPUT_FILE
+    fi
 
-    # Note: Unfortunately the entry can only be treated (split) by spaces so that
-    # 'INPUT_FILE' will receive invalid values if the folder paths informed have
-    # spaces! By Questor
-    INPUT_FILE_ACCUMULATOR=$INPUT_FILE_ACCUMULATOR$SPACE_CTRL0$INPUT_FILE
-    SPACE_CTRL0=" "
+    # NOTE: We build up the files path part-to-part (concatenating strings) 
+    # to obtain a valid path as the checking we do below! By Questor
+    if ! [ -d "$INPUT_FILE_ACCUMULATOR" ] ; then
+        if [ -f "$INPUT_FILE_ACCUMULATOR" ] || [ -f "${INPUT_FILE_ACCUMULATOR%?}" ] ; then
 
-    # Note: We build up the files path part-to-part (concatenating strings) to obtain
-    # a valid path as the checking we do below! By Questor
-    if [ -f "$INPUT_FILE_ACCUMULATOR" ]; then
+            # NOTE: Checks whether is or isn't an absolute path! By Questor
+            if ! [[ "$INPUT_FILE_ACCUMULATOR" = /* ]] ; then
 
-        # Note: Checks whether is or isn't an absolute path! By Questor
-        if ! [[ "$INPUT_FILE_ACCUMULATOR" = /* ]] ; then
+                # NOTE: Transforms a relative in absolute path. This is a Wine need!
+                # By Questor
+                FILE_NOW=$(realpath "$INPUT_FILE_ACCUMULATOR")
+            else
 
-            # Note: Transforms a relative in absolute path. This is a Wine need!
+                # NOTE: In case of absolute path! By Questor
+                FILE_NOW="$INPUT_FILE_ACCUMULATOR"
+            fi
+
+            # NOTE: Adds the default drive letter! By Questor
+            FILE_NOW=$(winepath -w "$FILE_NOW")
+
+            # NOTE: Escapes the bars and spaces! Conforms to the Wine standards!
             # By Questor
-            FILE_NOW=$(realpath "$INPUT_FILE_ACCUMULATOR")
-        else
+            FILE_NOW=$(echo $FILE_NOW | sed 's,\\,\\\\,g' | sed 's, ,\\ ,g')
 
-            # Note: In case of absolute path! By Questor
-            FILE_NOW="$INPUT_FILE_ACCUMULATOR"
+            # NOTE: Make the command with the files to pass as an argument for Notepad++!
+            # By Questor
+            INPUT_FILES=$INPUT_FILES$SPACE_CTRL$FILE_NOW
+            SPACE_CTRL=" "
+
+            INPUT_FILE_ACCUMULATOR=""
         fi
 
-        # Note: Adds the default drive letter! By Questor
-        FILE_NOW=$(winepath -w "$FILE_NOW")
-
-        # Note: Escapes the bars and spaces! Conforms to the Wine standards!
-        # By Questor
-        FILE_NOW=$(echo $FILE_NOW | sed 's,\\,\\\\,g' | sed 's, ,\\ ,g')
-
-        # Note: Make the command with the files to pass as an argument for Notepad++!
-        # By Questor
-        INPUT_FILES=$INPUT_FILES$SPACE_CTRL1$FILE_NOW
-
-        SPACE_CTRL1=" "
-        SPACE_CTRL0=""
-        INPUT_FILE_ACCUMULATOR=""
-
-    # Note: We use '2>/dev/null' to suppress unwanted prints! By Questor
+    # NOTE: We use '2>/dev/null' to suppress unwanted prints! By Questor
     fi 2>/dev/null
+
 done
 
-# Note: Runs Wine as the place where it's! By Questor
+# NOTE: Runs Wine as the place where it's! By Questor
 if [[ -e "$HOME/.PlayOnLinux/wineprefix/npp/drive_c/Program Files/Notepad++/notepad++.exe" ]]; then
-    eval "/usr/share/playonlinux/playonlinux --run \"notepad++\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
+
+    # NOTE: The eval is a strategy to get pass the arguments to the Wine/Notepad++! 
+    # Use "2> /dev/null 1> /dev/null" is a strategy to detach the process! By Questor
+    eval "export POL_IgnoreWineErrors=True && /usr/share/playonlinux/playonlinux --run \"notepad++\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
+
 elif [[ -e "$HOME/.wine/drive_c/Program Files (x86)/Notepad++/notepad++.exe" ]]; then
 
-    # Note: The eval is a strategy to get pass the arguments to the Wine/Notepad++! 
+    # NOTE: The eval is a strategy to get pass the arguments to the Wine/Notepad++! 
     # Use "2> /dev/null 1> /dev/null" is a strategy to detach the process! By Questor
     eval "env WINEPREFIX=\"$HOME/.wine\" wine \"C:/Program Files (x86)/Notepad++/Notepad++.exe\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
+
 else
     echo "Notepad++.exe can't be found!"
 fi

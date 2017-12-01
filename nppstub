@@ -78,12 +78,14 @@ for (( i=0; i<=$(( $TOTAL -1 )); i++ )) ; do
     INPUT_FILE="${F_SPLIT_R[$i]}"
     if [ -n "$INPUT_FILE" ] ; then
         INPUT_FILE_ACCUMULATOR=$INPUT_FILE_ACCUMULATOR"/"$INPUT_FILE
+    else
+        continue
     fi
 
     # NOTE: We build up the files path part-to-part (concatenating strings) 
     # to obtain a valid path as the checking we do below! By Questor
     if ! [ -d "$INPUT_FILE_ACCUMULATOR" ] ; then
-        if [ -f "$INPUT_FILE_ACCUMULATOR" ] || [ -f "${INPUT_FILE_ACCUMULATOR%?}" ] ; then
+        if ([ -f "${INPUT_FILE_ACCUMULATOR%?}" ]) || ((( i == $(( $TOTAL -1 )) )) && [ -f "$INPUT_FILE_ACCUMULATOR" ]) ; then
 
             # NOTE: Checks whether is or isn't an absolute path! By Questor
             if ! [[ "$INPUT_FILE_ACCUMULATOR" = /* ]] ; then

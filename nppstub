@@ -49,19 +49,33 @@ f_split() {
         DELIMITER_P="[.]/"
     fi
 
-    # NOTE I: Creates multiple commands inside "SPLIT_NOW" variable to add 
-    # items to "F_SPLIT_R" variable. These commands are executed with "eval"! 
-    # By Questor
-    # NOTE II: The ' " ' are escaped to ' \" ' to avoid problems in the eval 
-    # execution just as the ' \ ' are escaped to ' \\ '! By Questor
-    SPLIT_NOW=$(awk -F "$DELIMITER_P" '{for(i=1; i<=NF; i++){gsub("\\\\", "\\\\", $i); gsub("\"", "\\\"", $i); printf "F_SPLIT_R+=(\"%s\")\n", $i;}}' <<< "$TARGET_P")
-    eval $SPLIT_NOW
+    if [ ${REMOVE_N} -eq 1 ] ; then
 
-    # NOTE: Free memory! By Questor
-    SPLIT_NOW=""
+        # NOTE: Due to bash limitations we have some problems getting the 
+        # output of a split by awk inside an array and so we need to use 
+        # "line break" (\n) to succeed. Seen this, we remove the line breaks 
+        # momentarily afterwards we reintegrate them. The problem is that if 
+        # there is a line break in the "string" informed, this line break will 
+        # be lost, that is, it is erroneously deleted in the output! 
+        # By Questor
+        TARGET_P=$(awk 'BEGIN {RS="dn"} {gsub("\n", "3f2c417d448c46918289218b7337fcaf"); printf $0}' <<< "${TARGET_P}")
+
+        # TODO: Possible solution "https://askubuntu.com/a/343729/134723"? By Questor
+
+    fi
+
+    SPLIT_NOW=$(awk -F "$DELIMITER_P" '{for(i=1; i<=NF; i++){printf "%s\n", $i}}' <<< "${TARGET_P}")
+
+    while IFS= read -r LINE_NOW; do
+        if [ ${REMOVE_N} -eq 1 ] ; then
+            LN_NOW_WITH_N=$(awk 'BEGIN {RS="dn"} {gsub("3f2c417d448c46918289218b7337fcaf", "\n"); printf $0}' <<< "${LINE_NOW}")
+            F_SPLIT_R+=("$LN_NOW_WITH_N")
+        else
+            F_SPLIT_R+=("$LINE_NOW")
+        fi
+    done <<< "$SPLIT_NOW"
 }
 
-f_split "$(echo -ne $@)" "/"
 INPUT_FILES=""
 SPACE_CTRL=""
 INPUT_FILE_ACCUMULATOR=""

@@ -40,6 +40,15 @@ f_split() {
         REMOVE_N=0
     fi
 
+    # NOTE: Awk's field separator ("-F") is treated as a regexp as long as "./" 
+    # is more than two characters. You'd need to escape that "./" with "[.]/". 
+    # Below I treat the specific case! This was the only parameter that has 
+    # been a problem so far! By Questor
+    # [Ref.: https://unix.stackexchange.com/a/390732/61742]
+    if [ "$DELIMITER_P" == "./" ] ; then
+        DELIMITER_P="[.]/"
+    fi
+
     if [ ${REMOVE_N} -eq 1 ] ; then
 
         # NOTE: Due to bash limitations we have some problems getting the 
@@ -50,6 +59,9 @@ f_split() {
         # be lost, that is, it is erroneously deleted in the output! 
         # By Questor
         TARGET_P=$(echo "$TARGET_P" | awk 'BEGIN {RS="dn" } {gsub("\n","3f2c417d448c46918289218b7337fcaf") ;printf $0 }')
+
+        # TODO: Possible solution "https://askubuntu.com/a/343729/134723"? By Questor
+
     fi
 
     SPLIT_NOW=$(awk -F"$DELIMITER_P" '{for(i=1;i<=NF;i++){printf "%s\n", $i}}' <<<"${TARGET_P}")
@@ -67,51 +79,87 @@ f_split() {
 INPUT_FILES=""
 SPACE_CTRL=""
 INPUT_FILE_ACCUMULATOR=""
+USE_DOT=0
 f_split "$(echo -ne $@)" "/"
-TOTAL=${#F_SPLIT_R[*]}
+F_SPLIT_R_0=("${F_SPLIT_R[@]}")
+F_SPLIT_R_1=()
+TOTAL_0=${#F_SPLIT_R_0[*]}
 INPUT_FILE_ACCUMULATOR=""
-for (( i=0; i<=$(( $TOTAL -1 )); i++ )) ; do
+for (( i=0; i<=$(( $TOTAL_0 -1 )); )) ; do
 
     # NOTE: Unfortunately the input can only be treated as string so that 
-    # 'INPUT_FILE' will receive invalid values if the folder paths informed 
+    # "INPUT_FILE" will receive invalid values if the folder paths informed 
     # have spaces! By Questor
-    INPUT_FILE="${F_SPLIT_R[$i]}"
+    INPUT_FILE="${F_SPLIT_R_0[$i]}"
     if [ -n "$INPUT_FILE" ] ; then
-        INPUT_FILE_ACCUMULATOR=$INPUT_FILE_ACCUMULATOR"/"$INPUT_FILE
+        # NOTE: The logic in this "if" block allows us to handle situations 
+        # where there are relative and absolute paths mixed in the list! 
+        # By Questor
+
+        if ( [[ "$INPUT_FILE" == "." ]] && [[ -z "$INPUT_FILE_ACCUMULATOR" ]] ) || [ ${USE_DOT} -eq 1 ] ; then
+            INPUT_FILE_ACCUMULATOR="."
+            USE_DOT=0
+            ((i++))
+        elif [[ "$INPUT_FILE" == *" ." ]] && (( i < $(( $TOTAL_0 -1 )) )) ; then
+            # NOTE I: "[[" and "]]" means that bash doesn't 
+            # "parameter substitution"/
+            # "manipulating and/or expanding variables"! By Questor
+            # NOTE II: "(( i < $(( $TOTAL_0 -1 )) ))" exists because there may 
+            # be file name with a dot at the last position (F_SPLIT_R_0)!
+            # By Questor
+
+            f_split "$INPUT_FILE" " ."
+            F_SPLIT_R_1=("${F_SPLIT_R[@]}")
+
+            # NOTE III: The space at the end is only to ensure according to 
+            # the rules of this script that it is a correct path to a file and 
+            # not a partial path interpreted as a valid path in a later 
+            # conditional! By Questor
+            INPUT_FILE_ACCUMULATOR=$INPUT_FILE_ACCUMULATOR"/"${F_SPLIT_R_1[0]}" "
+
+            USE_DOT=1
+        else
+            INPUT_FILE_ACCUMULATOR=$INPUT_FILE_ACCUMULATOR"/"$INPUT_FILE
+            ((i++))
+        fi
     else
+        ((i++))
         continue
     fi
 
     # NOTE: We build up the files path part-to-part (concatenating strings) 
     # to obtain a valid path as the checking we do below! By Questor
     if ! [ -d "$INPUT_FILE_ACCUMULATOR" ] ; then
-        if ([ -f "${INPUT_FILE_ACCUMULATOR%?}" ]) || ((( i == $(( $TOTAL -1 )) )) && [ -f "$INPUT_FILE_ACCUMULATOR" ]) ; then
+        # NOTE: Avoid opening folders as files! By Questor
+
+        if ( [ -f "${INPUT_FILE_ACCUMULATOR%?}" ] ) || ( (( i == $TOTAL_0 )) && [ -f "$INPUT_FILE_ACCUMULATOR" ] ) ; then
 
             # NOTE: Checks whether is or isn't an absolute path! By Questor
-            if ! [[ "$INPUT_FILE_ACCUMULATOR" = /* ]] ; then
+            if [[ "$INPUT_FILE_ACCUMULATOR" == "/"* ]] ; then
+                # NOTE: In case of absolute path! By Questor
 
-                # NOTE: Transforms a relative in absolute path. This is a Wine need!
-                # By Questor
-                FILE_NOW=$(realpath "$INPUT_FILE_ACCUMULATOR")
+                FILE_NOW="$INPUT_FILE_ACCUMULATOR"
             else
 
-                # NOTE: In case of absolute path! By Questor
-                FILE_NOW="$INPUT_FILE_ACCUMULATOR"
+                # NOTE: Transforms a relative in absolute path (wine need)! 
+                # By Questor
+                FILE_NOW=$(realpath "$INPUT_FILE_ACCUMULATOR")
+
             fi
 
-            # NOTE: Adds the default drive letter! By Questor
+            # NOTE: Adds the default drive letter (wine need)! By Questor
             FILE_NOW=$(winepath -w "$FILE_NOW")
 
-            # NOTE: Escapes the bars and spaces! Conforms to the Wine standards!
-            # By Questor
+            # NOTE: Escapes the bars and spaces! Conforms to the Wine 
+            # standards! By Questor
             FILE_NOW=$(echo $FILE_NOW | sed 's,\\,\\\\,g' | sed 's, ,\\ ,g')
 
-            # NOTE: Make the command with the files to pass as an argument for Notepad++!
-            # By Questor
+            # NOTE: Files to pass as an argument to Notepad++! By Questor
             INPUT_FILES=$INPUT_FILES$SPACE_CTRL$FILE_NOW
             SPACE_CTRL=" "
 
             INPUT_FILE_ACCUMULATOR=""
+
         fi
 
     # NOTE: We use '2>/dev/null' to suppress unwanted prints! By Questor
@@ -122,16 +170,22 @@ done
 # NOTE: Runs Wine as the place where it's! By Questor
 if [[ -e "$HOME/.PlayOnLinux/wineprefix/npp/drive_c/Program Files/Notepad++/notepad++.exe" ]]; then
 
-    # NOTE: The eval is a strategy to get pass the arguments to the Wine/Notepad++! 
-    # Use "2> /dev/null 1> /dev/null" is a strategy to detach the process! By Questor
+    # NOTE: The eval is a strategy to get pass the arguments to the 
+    # Wine/Notepad++! Use "2> /dev/null 1> /dev/null" is a strategy to detach 
+    # the process! By Questor
+    # NOTE II: Start Wine with PLayOnLInux! By Questor
     eval "export POL_IgnoreWineErrors=True && /usr/share/playonlinux/playonlinux --run \"notepad++\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
 
 elif [[ -e "$HOME/.wine/drive_c/Program Files (x86)/Notepad++/notepad++.exe" ]]; then
 
-    # NOTE: The eval is a strategy to get pass the arguments to the Wine/Notepad++! 
-    # Use "2> /dev/null 1> /dev/null" is a strategy to detach the process! By Questor
+    # NOTE: The eval is a strategy to get pass the arguments to the 
+    # Wine/Notepad++! Use "2> /dev/null 1> /dev/null" is a strategy to detach 
+    # the process! By Questor
+    # NOTE II: Default method to start Wine! By Questor
     eval "env WINEPREFIX=\"$HOME/.wine\" wine \"C:/Program Files (x86)/Notepad++/Notepad++.exe\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
 
 else
-    echo "Notepad++.exe can't be found!"
+    echo "> ---------------------------------------------------"
+    echo "ERROR: Notepad++.exe can't be found!"
+    echo "< ---------------------------------------------------"
 fi

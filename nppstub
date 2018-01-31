@@ -56,19 +56,25 @@ f_split() {
         # "line break" (\n) to succeed. Seen this, we remove the line breaks 
         # momentarily afterwards we reintegrate them. The problem is that if 
         # there is a line break in the "string" informed, this line break will 
-        # be lost, that is, it is erroneously deleted in the output! 
+        # be lost, that is, it is erroneously removed in the output! 
         # By Questor
         TARGET_P=$(awk 'BEGIN {RS="dn"} {gsub("\n", "3f2c417d448c46918289218b7337fcaf"); printf $0}' <<< "${TARGET_P}")
 
-        # TODO: Possible solution "https://askubuntu.com/a/343729/134723"? By Questor
+        # TODO: Is there no more efficient way to split? That is, without 
+        # having to remove and reintegrate the line breaks? By Questor
 
     fi
 
     SPLIT_NOW=$(awk -F "$DELIMITER_P" '{for(i=1; i<=NF; i++){printf "%s\n", $i}}' <<< "${TARGET_P}")
 
-    while IFS= read -r LINE_NOW; do
+    while IFS= read -r LINE_NOW ; do
         if [ ${REMOVE_N} -eq 1 ] ; then
-            LN_NOW_WITH_N=$(awk 'BEGIN {RS="dn"} {gsub("3f2c417d448c46918289218b7337fcaf", "\n"); printf $0}' <<< "${LINE_NOW}")
+
+            # NOTE: We use "\n\r" to reintegrate the line breaks because when 
+            # we only use "\ n" we are losing empty spaces at the beginning 
+            # and end of the strings! By Questor
+            LN_NOW_WITH_N=$(awk 'BEGIN {RS="dn"} {gsub("3f2c417d448c46918289218b7337fcaf", "\n\r"); printf $0}' <<< "${LINE_NOW}")
+
             F_SPLIT_R+=("$LN_NOW_WITH_N")
         else
             F_SPLIT_R+=("$LINE_NOW")

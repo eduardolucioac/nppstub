@@ -14,6 +14,32 @@
 # "
 # --------------------------------------------------------------------
 
+F_PRESERVE_BLANK_LINES_R=""
+f_preserve_blank_lines() {
+    : 'Remove "single quotes" used to prevent blank lines being erroneously 
+    removed.
+
+    "single quotes" is used at the beginning and end of the strings to prevent 
+    blank lines with no other characters in the sequence being erroneously 
+    removed! We do not know the reason for this side effect! This problem 
+    occurs, for example, in commands that involve "sed" and "awk". When the 
+    text entry for "sed" ("sed -i") is a file the problem addressed here does 
+    not occur.
+
+    Args:
+        STR_TO_TREAT_P (str): String to be treated.
+
+    Returns:
+        F_PRESERVE_BLANK_LINES_R (str): String treated.
+    '
+
+    F_PRESERVE_BLANK_LINES_R=""
+    STR_TO_TREAT_P=$1
+    STR_TO_TREAT_P=${STR_TO_TREAT_P%?}
+    F_PRESERVE_BLANK_LINES_R=${STR_TO_TREAT_P#?}
+}
+
+# [Ref.: https://stackoverflow.com/a/48551138/3223785]
 F_SPLIT_R=()
 f_split() {
     : 'It does a "split" into a given string and returns an array.
@@ -40,10 +66,8 @@ f_split() {
         REMOVE_N=0
     fi
 
-    # NOTE: Awk's field separator ("-F") is treated as a regexp as long as "./" 
-    # is more than two characters. You'd need to escape that "./" with "[.]/". 
-    # Below I treat the specific case! This was the only parameter that has 
-    # been a problem so far! By Questor
+    # NOTE: This was the only parameter that has been a problem so far! 
+    # By Questor
     # [Ref.: https://unix.stackexchange.com/a/390732/61742]
     if [ "$DELIMITER_P" == "./" ] ; then
         DELIMITER_P="[.]/"
@@ -58,22 +82,28 @@ f_split() {
         # there is a line break in the "string" informed, this line break will 
         # be lost, that is, it is erroneously removed in the output! 
         # By Questor
-        TARGET_P=$(awk 'BEGIN {RS="dn"} {gsub("\n", "3f2c417d448c46918289218b7337fcaf"); printf $0}' <<< "${TARGET_P}")
-
-        # TODO: Is there no more efficient way to split? That is, without 
-        # having to remove and reintegrate the line breaks? By Questor
+        TARGET_P=$(awk 'BEGIN {RS="dn"} {gsub("\n", "3F2C417D448C46918289218B7337FCAF"); printf $0}' <<< "${TARGET_P}")
 
     fi
+
+    # NOTE: The replace of "\n" by "3F2C417D448C46918289218B7337FCAF" results 
+    # in more occurrences of "3F2C417D448C46918289218B7337FCAF" than the 
+    # amount of "\n" that there was originally in the string (one more 
+    # occurrence at the end of the string)! We can not explain the reason for 
+    # this side effect. The line below corrects this problem! By Questor
+    TARGET_P=${TARGET_P%????????????????????????????????}
 
     SPLIT_NOW=$(awk -F "$DELIMITER_P" '{for(i=1; i<=NF; i++){printf "%s\n", $i}}' <<< "${TARGET_P}")
 
     while IFS= read -r LINE_NOW ; do
         if [ ${REMOVE_N} -eq 1 ] ; then
 
-            # NOTE: We use "\n\r" to reintegrate the line breaks because when 
-            # we only use "\ n" we are losing empty spaces at the beginning 
-            # and end of the strings! By Questor
-            LN_NOW_WITH_N=$(awk 'BEGIN {RS="dn"} {gsub("3f2c417d448c46918289218b7337fcaf", "\n\r"); printf $0}' <<< "${LINE_NOW}")
+            # NOTE: We use "'" to prevent blank lines with no other characters 
+            # in the sequence being erroneously removed! We do not know the 
+            # reason for this side effect! By Questor
+            LN_NOW_WITH_N=$(awk 'BEGIN {RS="dn"} {gsub("3F2C417D448C46918289218B7337FCAF", "\n"); printf $0}' <<< "'${LINE_NOW}'")
+            f_preserve_blank_lines "$LN_NOW_WITH_N"
+            LN_NOW_WITH_N="$F_PRESERVE_BLANK_LINES_R"
 
             F_SPLIT_R+=("$LN_NOW_WITH_N")
         else
@@ -97,6 +127,7 @@ for (( i=0; i<=$(( $TOTAL_0 -1 )); )) ; do
     # "INPUT_FILE" will receive invalid values if the folder paths informed 
     # have spaces! By Questor
     INPUT_FILE="${F_SPLIT_R_0[$i]}"
+
     if [ -n "$INPUT_FILE" ] ; then
         # NOTE: The logic in this "if" block allows us to handle situations 
         # where there are relative and absolute paths mixed in the list! 

@@ -32,7 +32,7 @@ vim /home/[your_user]/.bashrc # For your user configs!
  - Copy nppstub to scripts folder...
 
 ```
-cp -avr [file_path]/nppstub /home/[your_user]/.scripts/
+cp -avr [file_path]/nppstub/nppstub /home/[your_user]/.scripts/
 ```
 
  - Create a symbolic link to the root user (su)...

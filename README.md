@@ -123,7 +123,7 @@ nppstub $(bash command)
  - One example...
  
 ```
-nppstub $(find ./ -name "*.py" -type f -exec grep -iFl 'some string' -- {} \;)
+nppstub $(find ./ -name "*.py" -type f -exec grep -IiFl 'some string' -- {} \;)
 ```
 
  - Note: In the above example we do a search ("find" command) for all files with extension "*.py" that have the content "some string" in your text!

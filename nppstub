@@ -112,6 +112,9 @@ f_split() {
     done <<< "$SPLIT_NOW"
 }
 
+# TODO: Treat when paths are relative and have no slash ("./")! 
+# By Questor
+
 INPUT_FILES=""
 SPACE_CTRL=""
 INPUT_FILE_ACCUMULATOR=""
@@ -204,22 +207,32 @@ for (( i=0; i<=$(( $TOTAL_0 -1 )); )) ; do
 
 done
 
+# NOTE: To be able to execute as "root" is necessary to create a "wineprefix" 
+# inside "/root" and installs "Notepad++" inside it! By Questor
+
 # NOTE: Runs Wine as the place where it's! By Questor
 if [[ -e "$HOME/.PlayOnLinux/wineprefix/npp/drive_c/Program Files/Notepad++/notepad++.exe" ]]; then
 
-    # NOTE: The eval is a strategy to get pass the arguments to the 
+    # NOTE I: The eval is a strategy to get pass the arguments to the 
     # Wine/Notepad++! Use "2> /dev/null 1> /dev/null" is a strategy to detach 
     # the process! By Questor
     # NOTE II: Start Wine with PLayOnLInux! By Questor
-    eval "export POL_IgnoreWineErrors=True && /usr/share/playonlinux/playonlinux --run \"notepad++\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
+    if [[ $EUID -ne 0 ]]; then
+        eval "export POL_IgnoreWineErrors=True && /usr/share/playonlinux/playonlinux --run \"notepad++\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
+    else
+    # NOTE: Allows "Notepad ++" to be run as "root"! By Questor
 
-elif [[ -e "$HOME/.wine/drive_c/Program Files (x86)/Notepad++/notepad++.exe" ]]; then
+        eval "env WINEARCH=win32 WINEPREFIX=\"/root/npp_root\" wine \"C:/Program Files/Notepad++/Notepad++.exe\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
 
-    # NOTE: The eval is a strategy to get pass the arguments to the 
+    fi
+
+elif [[ -e "$HOME/.wine/drive_c/Program Files/Notepad++/notepad++.exe" ]]; then
+
+    # NOTE I: The eval is a strategy to get pass the arguments to the 
     # Wine/Notepad++! Use "2> /dev/null 1> /dev/null" is a strategy to detach 
     # the process! By Questor
     # NOTE II: Default method to start Wine! By Questor
-    eval "env WINEPREFIX=\"$HOME/.wine\" wine \"C:/Program Files (x86)/Notepad++/Notepad++.exe\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
+    eval "env WINEARCH=win32 WINEPREFIX=\"$HOME/.wine\" wine \"C:/Program Files/Notepad++/Notepad++.exe\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
 
 else
     echo "> ---------------------------------------------------"

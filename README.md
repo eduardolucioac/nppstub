@@ -1,4 +1,4 @@
-nppstub - Notepad++ Stub
+nppstub - Integrate Notepad++ with Linux terminal commands!
 =============
 
 What is nppstub?

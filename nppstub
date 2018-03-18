@@ -231,7 +231,7 @@ if [[ -e "$HOME/.PlayOnLinux/wineprefix/npp/drive_c/Program Files/Notepad++/note
     if [[ $EUID -ne 0 ]]; then
         eval "export POL_IgnoreWineErrors=True && /usr/share/playonlinux/playonlinux --run \"notepad++\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
     else
-    # NOTE: Allows "Notepad ++" to run as "root"! By Questor
+    # NOTE: Allows "Notepad++" to run as "root"! By Questor
 
         eval "env WINEARCH=win32 WINEPREFIX=\"/root/npp_root\" wine \"C:/Program Files/Notepad++/Notepad++.exe\" -multiInst -nosession $INPUT_FILES 2> /dev/null 1> /dev/null &"
 
